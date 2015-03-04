@@ -1,0 +1,8 @@
+/* compiled by scssphp v0.0.9 on Wed, 04 Mar 2015 12:36:03 +0100 (0.0013s) */
+
+body {
+  background-color: #444; }
+
+.container {
+  display: table;
+  margin: 0px auto; }

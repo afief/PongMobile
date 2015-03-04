@@ -6,6 +6,8 @@ function init() {
 	var bats = [];
 	var pointer1Bat;
 	var pointer2Bat;
+	var isPlay = false;
+	var direction;
 
 	var game = new Phaser.Game(dimensi.width, dimensi.height, Phaser.CANVAS, 'arena', {preload: onPreload, create: onCreate, update: onUpdate, render: onRender}, false);
 	function onPreload() {
@@ -18,16 +20,20 @@ function init() {
 		game.stage.backgroundColor = '#ffffff';
 		game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
 
+		//setup table
 		table = game.add.sprite(0, 0, "table");
 		table.anchor.set(0.5, 0.5);
 		table.x = game.width / 2;
 		table.y = game.height / 2;
 
+		//setup ball
 		ball = game.add.sprite(0, 0, "ball");
 		ball.anchor.set(0.5, 0.5);
 		ball.x = game.width / 2;
 		ball.y = game.height / 2;
+		direction = new Phaser.Point(0,0);
 
+		//setup bats
 		bats[0] = game.add.sprite(0,0, "bat_blue");
 		bats[0].anchor.set(0, 0.5);
 		bats[0].scale.set(0.4, 0.4);
@@ -40,6 +46,7 @@ function init() {
 		bats[1].x = game.width;
 		bats[1].y = game.height / 2;
 
+		//setup input
 		game.input.addPointer();
 		game.input.addPointer();
 	}

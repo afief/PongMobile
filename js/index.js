@@ -1,7 +1,8 @@
+var game;
 function init() {
 	var dimensi = {width: 1000, height: 444};
 
-	var game = new Phaser.Game(dimensi.width, dimensi.height, Phaser.CANVAS, 'arena', null, false);
+	game = new Phaser.Game(dimensi.width, dimensi.height, Phaser.CANVAS, 'arena', null, false);
 	game.state.add("game", Game);
 	game.state.start("game");
 }

@@ -4,14 +4,13 @@ var Game = function () {
 	var ball;
 	var bats = [];
 	var lastSmash;
-	var pointer1Bat;
-	var pointer2Bat;
 	var isPlay = false;
 	var direction;
 	var speed;
 	var tapText;
 
 	var game;
+	this.playerInput = undefined;
 
 	this.preload = function() {
 		game = this.game;
@@ -62,6 +61,7 @@ var Game = function () {
 		//setup input
 		game.input.addPointer();
 		game.input.addPointer();
+		this.playerInput = new PlayerInput(game, bats[0], bats[1]);
 
 		//setup physics
 		game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -72,7 +72,7 @@ var Game = function () {
 		tapText = game.add.bitmapText(game.width/2, game.height * 3/4, 'comicneue_regular_white','Tap to Play!', 40);
 		tapText.x -= tapText.width / 2;
 		tapText.y -= tapText.height / 2;
-
+		
 		var timer = game.time.events.loop(Phaser.Timer.SECOND * 3, speedUpgrade, this);
 		reset();
 	}
@@ -110,24 +110,8 @@ var Game = function () {
 
 	this.update = function() {
 		//controller update
-		if (game.input.pointer1.isDown) {
-			if (game.input.pointer1.x > (game.width/2))
-				pointer1Bat = bats[1];
-			else
-				pointer1Bat = bats[0];
 
-			if ((game.input.pointer1.y > 0) && (game.input.pointer1.y < game.height))
-			pointer1Bat.y = game.input.pointer1.y;
-		}
-		if (game.input.pointer2.isDown) {
-			if (pointer1Bat == bats[0])
-				pointer2Bat = bats[1];
-			else
-				pointer2Bat = bats[0];
-
-			if ((game.input.pointer2.y > 0) && (game.input.pointer2.y < game.height))
-				pointer2Bat.y = game.input.pointer2.y;
-		}
+		this.playerInput.update();
 
 		if (isPlay) {
 			//cek pinggiran
@@ -172,4 +156,59 @@ var Game = function () {
 	this.shutdown = function() {
 
 	}
+}
+
+var PlayerInput = function(game, bat1, bat2) {
+
+	var pointer1Bat = null;
+	var pointer2Bat = null;
+
+	var p1atas = game.input.keyboard.addKey(Phaser.Keyboard.A);
+	var p1bawah = game.input.keyboard.addKey(Phaser.Keyboard.S);
+
+	var p2atas = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+	var p2bawah = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+
+	this.player1 = {};
+	this.player2 = {};
+
+	this.addYPos = function(playerIndex, ypos) {
+		var _player = (playerIndex == 1) ? bat1 : bat2;
+		this.updateBatYPos(_player, _player.y += ypos);
+	}
+	this.updateBatYPos = function(bat, ypos) {
+		if ((ypos > 0) && (ypos < game.height))
+			bat.y = ypos;
+	}
+
+	this.update = function() {
+		if (game.input.pointer1.isDown) {
+			if (game.input.pointer1.x > (game.width/2))
+				pointer1Bat = bat2;
+			else
+				pointer1Bat = bat1;
+
+			this.updateBatYPos(pointer1Bat, game.input.pointer1.y);
+		}
+		if (game.input.pointer2.isDown) {
+			if (pointer1Bat == bat1)
+				pointer2Bat = bat2;
+			else
+				pointer2Bat = bat1;
+
+			this.updateBatYPos(pointer2Bat, game.input.pointer2.y);			
+		}
+
+		if (game.input.keyboard.isDown(Phaser.Keyboard.A))
+			this.addYPos(1, -4);
+			
+		if (game.input.keyboard.isDown(Phaser.Keyboard.D))
+			this.addYPos(1, +4);
+
+		if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
+			this.addYPos(2, +4);
+			
+		if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
+			this.addYPos(2, -4);
+	}	
 }

@@ -9,6 +9,7 @@ var Game = function () {
 	var isPlay = false;
 	var direction;
 	var speed;
+	var tapText;
 
 	var game;
 
@@ -20,9 +21,13 @@ var Game = function () {
 		game.load.image("ball", "images/ball.png");
 		game.load.image("bat_blue", "images/bat_blue.png");
 		game.load.image("bat_red", "images/bat_red.png");
+
+		game.load.bitmapFont('comicneue_regular', 'images/fonts/comic_neue_regular.png', 'images/fonts/comic_neue_regular.fnt');
+		game.load.bitmapFont('comicneue_regular_white', 'images/fonts/comic_neue_regular_white.png', 'images/fonts/comic_neue_regular_white.fnt');
 	}
 
 	this.create = function() {
+
 		game.stage.backgroundColor = '#ffffff';
 		game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
 
@@ -31,27 +36,27 @@ var Game = function () {
 		table.anchor.set(0.5, 0.5);
 		table.x = game.width / 2;
 		table.y = game.height / 2;
+		table.inputEnabled = true;
+		table.events.onInputDown.add(startGame, this);
 
 		//setup ball
 		ball = game.add.sprite(0, 0, "ball");
 		ball.anchor.set(0.5, 0.5);
 		ball.x = game.width / 2;
 		ball.y = game.height / 2;
-		ball.inputEnabled = true;
-		ball.events.onInputDown.add(onBallTouch, this);
 		direction = new Phaser.Point(0,0);
 
 		//setup bats
 		bats[0] = game.add.sprite(0,0, "bat_blue");
 		bats[0].anchor.set(0, 0.5);
 		bats[0].scale.set(0.4, 0.4);
-		bats[0].x = 0;
+		bats[0].x = game.width / 2 - table.width/2 - bats[0].width;
 		bats[0].y = game.height / 2;
 
 		bats[1] = game.add.sprite(0,0, "bat_red");
 		bats[1].anchor.set(1, 0.5);
 		bats[1].scale.set(0.4, 0.4);
-		bats[1].x = game.width;
+		bats[1].x = game.width / 2 + table.width/2 + bats[1].width;
 		bats[1].y = game.height / 2;
 
 		//setup input
@@ -64,8 +69,11 @@ var Game = function () {
 		bats[0].body.immovable = true;
 		bats[1].body.immovable = true;
 
-		var timer = game.time.events.loop(Phaser.Timer.SECOND * 3, speedUpgrade, this);
+		tapText = game.add.bitmapText(game.width/2, game.height * 3/4, 'comicneue_regular_white','Tap to Play!', 40);
+		tapText.x -= tapText.width / 2;
+		tapText.y -= tapText.height / 2;
 
+		var timer = game.time.events.loop(Phaser.Timer.SECOND * 3, speedUpgrade, this);
 		reset();
 	}
 	function reset() {
@@ -79,8 +87,16 @@ var Game = function () {
 
 		bats[0].y = game.height / 2;
 		bats[1].y = game.height / 2;
+
+		lastSmash = null;
+		tapText.text = "Tap to Play!";
 	}
-	function onBallTouch() {
+
+	function startGame() {
+		if (isPlay) return;
+
+		tapText.text = "";
+
 		direction.x = (5 + Math.random() * 10) * [-1,1][Math.floor(Math.random() * 2)];
 		direction.y = (Math.random() * 10) * [-1,1][Math.floor(Math.random() * 2)];
 		direction.normalize();

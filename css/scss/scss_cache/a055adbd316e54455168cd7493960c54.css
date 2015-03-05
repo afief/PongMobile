@@ -1,7 +1,9 @@
-/* compiled by scssphp v0.0.9 on Wed, 04 Mar 2015 12:36:03 +0100 (0.0013s) */
+/* compiled by scssphp v0.0.9 on Thu, 05 Mar 2015 06:45:30 +0100 (0.0026s) */
 
 body {
-  background-color: #444; }
+  background-color: #444;
+  padding: 0px;
+  margin: 0px; }
 
 .container {
   display: table;

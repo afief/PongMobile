@@ -8,11 +8,18 @@ var Game = function () {
 	var direction;
 	var speed;
 	var tapText;
+	var p1Text;
+	var p2Text;
+
+	var p1ai; //player 1 artificial enemy
+	var p2ai; //player 2 artificial enemy
+
 
 	var game;
 	this.playerInput = undefined;
 
 	this.preload = function() {
+
 		game = this.game;
 		game.stage.disableVisibilityChange = true;
 
@@ -23,6 +30,7 @@ var Game = function () {
 
 		game.load.bitmapFont('comicneue_regular', 'images/fonts/comic_neue_regular.png', 'images/fonts/comic_neue_regular.fnt');
 		game.load.bitmapFont('comicneue_regular_white', 'images/fonts/comic_neue_regular_white.png', 'images/fonts/comic_neue_regular_white.fnt');
+
 	}
 
 	this.create = function() {
@@ -69,16 +77,31 @@ var Game = function () {
 		bats[0].body.immovable = true;
 		bats[1].body.immovable = true;
 
-		tapText = game.add.bitmapText(game.width/2, game.height * 3/4, 'comicneue_regular_white','Tap to Play!', 40);
-		tapText.x -= tapText.width / 2;
-		tapText.y -= tapText.height / 2;
+		//setup texts
+		tapText = game.add.bitmapText(table.width/2, table.height * 3/4, 'comicneue_regular_white','', 40);
+		tapText.align = "center";
 		
-		var timer = game.time.events.loop(Phaser.Timer.SECOND * 3, speedUpgrade, this);
+
+		p1Text = game.add.bitmapText(table.width * 1 / 4, table.height * 1/3, 'comicneue_regular_white','Tap to Join!', 40);
+		p1Text.align = "center";
+
+		p2Text = game.add.bitmapText(table.width * 3 / 4, table.height * 1/3, 'comicneue_regular_white','Tap to Join!', 40);
+		p2Text.align = "center";
+		
+		//setup artificial enemy
+		p1ai = new ArtificialEnemy(game, bats[0], ball);
+		p2ai = new ArtificialEnemy(game, bats[1], ball);
+
+		p1ai.active = true;
+		p2ai.active = true;
+
+		//setup ball speed
+		game.time.events.loop(Phaser.Timer.SECOND * 3, speedUpgrade, this);
 		reset();
 	}
 	function reset() {
 		isPlay = false;
-		speed = 300;
+		speed = 500;
 		ball.body.velocity.x = 0;
 		ball.body.velocity.y = 0;
 
@@ -89,7 +112,8 @@ var Game = function () {
 		bats[1].y = game.height / 2;
 
 		lastSmash = null;
-		tapText.text = "Tap to Play!";
+
+		tapText.text = "";
 	}
 
 	function startGame() {
@@ -112,6 +136,9 @@ var Game = function () {
 		//controller update
 
 		this.playerInput.update();
+
+		p1ai.update();
+		p2ai.update();
 
 		if (isPlay) {
 			//cek pinggiran
@@ -211,4 +238,25 @@ var PlayerInput = function(game, bat1, bat2) {
 		if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
 			this.addYPos(2, -4);
 	}	
+}
+
+var ArtificialEnemy = function(game, bat, ball) {
+	this.speed = 5;
+	this.active = false;
+
+	this.update = function() {
+		if (!this.active) return;
+		// console.log(ball.body.velocity.x);
+		if ((bat.y > ball.y) && (Math.abs(ball.y - bat.y) > bat.height/4)) {
+			if (!xor(bat.x < game.width/2, ball.body.velocity.x < 0))
+				bat.y -= this.speed;
+		} else if ((bat.y < ball.y) && (Math.abs(ball.y - bat.y) > bat.height/4)) {
+			if (!xor(bat.x < game.width/2, ball.body.velocity.x < 0))
+				bat.y += this.speed;
+		}
+	}
+}
+
+function xor(a,b) {
+  return ( a || b ) && !( a && b );
 }

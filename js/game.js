@@ -1,3 +1,4 @@
+var __l;
 var Game = function () {
 
 	var table;
@@ -14,6 +15,7 @@ var Game = function () {
 	var p1ai; //player 1 artificial enemy
 	var p2ai; //player 2 artificial enemy
 
+	var gameLayer; // gameplay Layer
 
 	var game;
 	this.playerInput = undefined;
@@ -34,37 +36,43 @@ var Game = function () {
 	}
 
 	this.create = function() {
-
 		game.stage.backgroundColor = '#ffffff';
 		game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
 
+		//create layer
+		gameLayer = game.add.group();
+		gameLayer.staticWidth = game.width; //game width 100%
+		gameLayer.staticHeight = 444; //game height
+		gameLayer.y += 40;
+
 		//setup table
-		table = game.add.sprite(0, 0, "table");
+		table = gameLayer.create(0, 0, "table");
+		table.x = gameLayer.staticWidth / 2;
+		table.y = gameLayer.staticHeight / 2;
 		table.anchor.set(0.5, 0.5);
-		table.x = game.width / 2;
-		table.y = game.height / 2;
 		table.inputEnabled = true;
 		table.events.onInputDown.add(startGame, this);
 
 		//setup ball
-		ball = game.add.sprite(0, 0, "ball");
+		ball = gameLayer.create(0, 0, "ball");
+		ball.x = gameLayer.staticWidth / 2;
+		ball.y = gameLayer.staticHeight / 2;
 		ball.anchor.set(0.5, 0.5);
-		ball.x = game.width / 2;
-		ball.y = game.height / 2;
 		direction = new Phaser.Point(0,0);
+		
 
 		//setup bats
-		bats[0] = game.add.sprite(0,0, "bat_blue");
-		bats[0].anchor.set(0, 0.5);
+		bats[0] = gameLayer.create(0,0, "bat_blue");		
 		bats[0].scale.set(0.4, 0.4);
-		bats[0].x = game.width / 2 - table.width/2 - bats[0].width;
-		bats[0].y = game.height / 2;
+		bats[0].x = gameLayer.staticWidth / 2 - table.width/2 - bats[0].width;
+		bats[0].y = gameLayer.staticHeight / 2;
+		bats[0].anchor.set(0, 0.5);
 
-		bats[1] = game.add.sprite(0,0, "bat_red");
-		bats[1].anchor.set(1, 0.5);
+		bats[1] = gameLayer.create(0,0, "bat_red");
 		bats[1].scale.set(0.4, 0.4);
-		bats[1].x = game.width / 2 + table.width/2 + bats[1].width;
-		bats[1].y = game.height / 2;
+		bats[1].x = gameLayer.staticWidth / 2 + table.width/2 + bats[1].width;
+		bats[1].y = gameLayer.staticHeight / 2;
+		bats[1].anchor.set(1, 0.5);
 
 		//setup input
 		game.input.addPointer();
@@ -89,15 +97,16 @@ var Game = function () {
 		p2Text.align = "center";
 		
 		//setup artificial enemy
-		p1ai = new ArtificialEnemy(game, bats[0], ball);
-		p2ai = new ArtificialEnemy(game, bats[1], ball);
+		p1ai = new ArtificialEnemy(gameLayer, bats[0], ball);
+		p2ai = new ArtificialEnemy(gameLayer, bats[1], ball);
 
-		p1ai.active = true;
-		p2ai.active = true;
+		p1ai.active = false;
+		p2ai.active = false;
 
 		//setup ball speed
 		game.time.events.loop(Phaser.Timer.SECOND * 3, speedUpgrade, this);
 		reset();
+
 	}
 	function reset() {
 		isPlay = false;
@@ -105,8 +114,8 @@ var Game = function () {
 		ball.body.velocity.x = 0;
 		ball.body.velocity.y = 0;
 
-		ball.x = game.width / 2;
-		ball.y = game.height / 2
+		ball.x = gameLayer.staticWidth/2;
+		ball.y = gameLayer.staticHeight/2;
 
 		bats[0].y = game.height / 2;
 		bats[1].y = game.height / 2;
@@ -144,7 +153,7 @@ var Game = function () {
 			//cek pinggiran
 			if (ball.y < (ball.height/2))
 				direction.y = Math.abs(direction.y);
-			else if (ball.y > (game.height - (ball.height/2)))
+			else if (ball.y > (gameLayer.staticHeight - (ball.height/2)))
 				direction.y = Math.abs(direction.y) * -1;
 
 			//moving ball
